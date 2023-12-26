@@ -1,3 +1,4 @@
+import sys
 import math
 from typing import Union
 
@@ -92,12 +93,12 @@ class CalcOneEqual:
 
 class CalcSystemEquals:
     def __init__(self, m=None, n=None, B=None, write_res=True):
-        if m == None or n == None or B == None:
-            self.m = int(input("Enter count of equals: "))
-            self.n = int(input("Enter count of uknowns: "))
-            self.B: list[list[int]] = self.MakeMatrix()
-            self.write_res: bool = write_res
-            return
+        # if m == None or n == None or B == None:
+        #     self.m = int(input("Enter count of equals: "))
+        #     self.n = int(input("Enter count of uknowns: "))
+        #     self.B: list[list[int]] = self.MakeMatrix()
+        #     self.write_res: bool = write_res
+        #     return
 
         self.write_res: bool = write_res
         self.m: int = m
@@ -203,39 +204,96 @@ class CalcSystemEquals:
         return True
     
     def CalcEquation(self):
-        flag = True
-        for i in range(self.m):
-            self.CalcString(i)
-            flag = self.MakeLastRow(i)
+        try:
+            flag = True
+            for i in range(self.m):
+                self.CalcString(i)
+                flag = self.MakeLastRow(i)
+                if not flag:
+                    break
+            
             if not flag:
-                break
-        
-        if not flag:
-            raise ValueError("No solutions in integers")
-        
-        if self.write_res:
-            self.WriteResult()
+                raise ValueError("No solutions in integers")
+            
+            if self.write_res:
+                self.WriteResult()
+
+        except Exception:
+            print("NO SOLUTIONS")
 
     
     def WriteResult(self):
+        # print(self.B)
+
         index = 0
         while self.B[index][index] != 0 and index < self.m:
             index += 1
         
+        # print(f"index = {index}")
+
+        # left = index
+        # right = self.n
+
+        t = 0
+        for j in range(index, self.n):
+            if self.B[index][j] != 0:
+                t += 1
+
+        # print(f"t = {t}")
+         
+        print(t)
+
         for i in range(self.m, self.m + self.n):
-            t = 0
-            print(f"\nx{(i-self.m)} = {self.B[i][self.n]}", end=" ")
-            for j in range(index, self.n):
-                if self.B[i][j] != 0:
-                    print(" + " + str(self.B[i][j]) + "*t" + str(t), end="")
-                    t += 1
+            # t = 0
+            # print(f"\nx{(i-self.m)} = {self.B[i][self.n]}", end=" ")
+            for j in range(index, self.n + 1):
+                print(f"{self.B[i][j]}", end=" ")
+                # if self.B[i][j] != 0:
+                #     print(" + " + str(self.B[i][j]) + "*t" + str(t), end="")
+                #     t += 1
+            print('')
 
 
+def input_parsing():
+    try:
+        # Перепутаны местами m и n
+        m, n = map(int, sys.stdin.readline().strip().split())
+        equations = []
+
+        if m >= 15 or n >= 15:
+            raise Exception
+        
+        for _ in range(m):
+            equation = list(map(int, sys.stdin.readline().strip().split()))
+            if len(equation) == n + 1:
+                equations.append(equation)
+            else:
+                print("Error: Неконсистентные входные данные")
+                sys.exit()
+
+        return m, n, equations
+    
+    except Exception:
+        print("Error: Неконсистентные входные данные")
+        sys.exit()
+
+
+def create_b_matrix(m, n, equations):
+    B = [[1 if (m + j) == i else 0 for j in range(n + 1)] for i in range(m + n)]
+
+    for i in range(m):
+        for j in range(n):
+            B[i][j] = equations[i][j]
+        B[i][n] = -1 * equations[i][n]
+    
+    return m, n, B
+    
 
 if __name__ == '__main__':
     # obj: CalcOneEqual = CalcOneEqual()
     # obj.CalcMatrix()
     # obj.WriteResult()
-
-    obj = CalcSystemEquals()
+    in_data = input_parsing()
+    m, n, B = create_b_matrix(*in_data)
+    obj = CalcSystemEquals(m, n, B)
     obj.CalcEquation()

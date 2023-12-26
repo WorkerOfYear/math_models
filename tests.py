@@ -1,5 +1,5 @@
 import unittest
-import re
+
 from unittest import TestCase
 
 from SolveEquations import CalcSystemEquals
